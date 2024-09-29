@@ -6,10 +6,13 @@ import { motion } from "framer-motion"
 function Card({data, reference, onDelete, onEdit, onFileUpload}) {
 	const [isEditing, setIsEditing] = useState(false)
 	const [editedDesc, setEditedDesc] = useState(data.desc)
+	const [taskType, setTaskType] = useState(data.taskType || '')
+	const [priority, setPriority] = useState(data.priority || 'none')
+	const [tagColor, setTagColor] = useState(data.tag.tagColor || 'green') // Add this line
 	const fileInputRef = useRef(null)
 
 	const handleEdit = () => {
-		onEdit(data.id, { desc: editedDesc })
+		onEdit(data.id, { desc: editedDesc, taskType, priority, tagColor }) // Include tagColor
 		setIsEditing(false)
 	}
 
@@ -21,9 +24,7 @@ function Card({data, reference, onDelete, onEdit, onFileUpload}) {
 	}
 
 	const triggerFileUpload = () => {
-		if (data.tag.tagColor === "green") {
-			fileInputRef.current.click();
-		}
+		fileInputRef.current.click();
 	}
 
 	return useMemo(() => (
@@ -47,14 +48,55 @@ function Card({data, reference, onDelete, onEdit, onFileUpload}) {
 		>
 			<FaRegFileAlt />
 			{isEditing ? (
-				<input 
-					value={editedDesc}
-					onChange={(e) => setEditedDesc(e.target.value)}
-					onBlur={handleEdit}
-					className="mt-5 w-full bg-transparent border-b border-white"
-				/>
+				<>
+					<input 
+						value={editedDesc}
+						onChange={(e) => setEditedDesc(e.target.value)}
+						className="mt-5 w-full bg-transparent border-b border-white"
+					/>
+					<select
+						value={taskType}
+						onChange={(e) => setTaskType(e.target.value)}
+						className="mt-2 w-full bg-zinc-800 text-white rounded p-1"
+					>
+						<option value="">Select Task Type</option>
+						<option value="tracker">Tracker</option>
+						<option value="reminder">Reminder</option>
+						<option value="fileholder">File Holder</option>
+						<option value="project">Project</option>
+						<option value="goal">Goal</option>
+						<option value="checklist">Checklist</option>
+					</select>
+					<select
+						value={priority}
+						onChange={(e) => setPriority(e.target.value)}
+						className="mt-2 w-full bg-zinc-800 text-white rounded p-1"
+					>
+						<option value="none">None</option>
+						<option value="low">Low Priority</option>
+						<option value="medium">Medium Priority</option>
+						<option value="high">High Priority</option>
+					</select>
+					<select
+						value={tagColor}
+						onChange={(e) => setTagColor(e.target.value)}
+						className="mt-2 w-full bg-zinc-800 text-white rounded p-1"
+					>
+						<option value="green">Green</option>
+						<option value="blue">Blue</option>
+						<option value="red">Red</option>
+						<option value="yellow">Yellow</option>
+					</select>
+					<button onClick={handleEdit} className="mt-2 bg-blue-500 text-white px-2 py-1 rounded">
+						Save
+					</button>
+				</>
 			) : (
-				<p className='text-sm leading-tight mt-5 font-semibold'>{data.desc}</p>
+				<>
+					<p className='text-sm leading-tight mt-5 font-semibold'>{data.desc}</p>
+					<p className='text-xs mt-2 text-gray-400'>Type: {data.taskType || 'Not specified'}</p>
+					<p className='text-xs mt-1 text-gray-400'>Priority: {data.priority || 'None'}</p>
+				</>
 			)}
 			{data.file && (
 				<div className="mt-2 text-xs">
@@ -84,7 +126,7 @@ function Card({data, reference, onDelete, onEdit, onFileUpload}) {
 				</div>
 				{data.tag.isOpen && (
 					<div 
-						className={`tag w-full h-10 ${data.tag.tagColor === "blue" ? "bg-blue-500" : "bg-green-600"} flex items-center justify-center cursor-pointer`}
+						className={`tag w-full h-10 bg-${data.tag.tagColor}-500 flex items-center justify-center cursor-pointer`}
 						onClick={triggerFileUpload}
 					>
 						<h3 className='text-sm font-sf-pro-display'>{data.tag.tagTitle}</h3>
@@ -98,8 +140,7 @@ function Card({data, reference, onDelete, onEdit, onFileUpload}) {
 				onChange={handleFileUpload}
 			/>
 		</motion.div>
-	), [data, reference, isEditing, editedDesc, onDelete, onEdit, onFileUpload])
+	), [data, reference, isEditing, editedDesc, taskType, priority, tagColor, onDelete, onEdit, onFileUpload])
 }
-
 
 export default Card
